@@ -18,6 +18,7 @@ public class GameActivity extends Activity {
         mode = getIntent().getIntExtra("mode", 1);
 
         view = (SurfaceView) findViewById(R.id.gameCanvas);
-        gm = new GameManager(10, 10, 0, 0, null, null, mode, view.getHolder());
+        gm = new GameManager(10, 10, 0, 0, null, null, mode, view);
+        gm.runGame();
     }
 }

@@ -1,9 +1,13 @@
 package com.fluttershy.snake;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,18 +34,45 @@ public class GameManager {
     int points = 0;
 
 
-    public GameManager(int x, int y, int xStart, int yStart, InputStream in, OutputStream out, int mode, SurfaceHolder holder) {
+    public GameManager(int x, int y, int xStart, int yStart, InputStream in, OutputStream out, int mode, final SurfaceView surfaceView) {
         board = new int[x][y];
         xHead = xStart;
         yHead = yStart;
         this.in = in;
         this.mode = mode;
         this.out = out;
-        this.holder = holder;
+        this.holder = surfaceView.getHolder();
+        if (mode == 1) {
+            surfaceView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        if (event.getX() * 1f / surfaceView.getWidth() > event.getY() * 1f / surfaceView.getHeight()) {
+                            if (event.getX() * 1f / surfaceView.getWidth() > (surfaceView.getHeight() - event.getY()) * 1f / surfaceView.getHeight()) {
+                                currentDirection = 2;
+                            } else {
+                                currentDirection = 1;
+                            }
+                        } else {
+                            if (event.getX() * 1f / surfaceView.getWidth() > (surfaceView.getHeight() - event.getY()) * 1f / surfaceView.getHeight()) {
+                                currentDirection = 3;
+                            } else {
+                                currentDirection = 4;
+                            }
+
+                        }
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     public void runGame() {
         status = 1;
+        if (mode == 1) {
+            board[xHead][yHead] = 1;
+        }
         startGameAnimation();
         Thread gLoop = new Thread(new Runnable() {
 
@@ -53,108 +84,111 @@ public class GameManager {
                 }
             }
         });
+        gLoop.start();
     }
 
-    public void display(){
+    public void display() {
         Canvas canvas = holder.lockCanvas();
-        while(canvas == null){
-            holder.lockCanvas();
+        while (canvas == null) {
+            canvas = holder.lockCanvas();
         }
-        if(mode == 1) {
-            displayBoard(canvas, board, boardLock, null);
+        if (mode == 1) {
+            canvas.drawColor(Color.WHITE);
+            Paint p = new Paint();
+            p.setColor(Color.BLACK);
+            displayBoard(canvas, board, boardLock, p);
+            holder.unlockCanvasAndPost(canvas);
         }
     }
 
     public void update() {
-        if(mode == 1){
-            int bufferedStatus = nextIteration(board, currentDirection);
-            if(bufferedStatus < 0){
+        if (mode == 1) {
+            int bufferedStatus = nextIteration(currentDirection);
+            if (bufferedStatus < 0) {
                 points = -bufferedStatus;
                 status = -1;
             }
-            if(bufferedStatus > 0){
+            if (bufferedStatus > 0) {
                 points = bufferedStatus;
             }
         }
     }
 
-    private static int nextIteration(int[][] board, int dir){
-        int size = 0;
-        int xHead = 0;
-        int yHead = 0;
+    private int nextIteration(int dir){
         for(int i = 0; i < board.length; i++){
             for(int j = 0; j < board[i].length; j++){
                 if(board[i][j] > 0){
-                    if(board[i][j] > size){
-                        size = board[i][j];
-                        xHead = i;
-                        yHead = j;
-                    }
                     board[i][j]--;
                 }
             }
         }
+        int size = points;
         int xSize = board.length;
         int ySize = board[0].length;
-        switch(dir){
+        switch (dir) {
             case 1:
-                if(yHead + 1 >= ySize){
+                if (yHead + 1 >= ySize) {
                     yHead = 0;
-                }
-                else{
+                } else {
                     yHead++;
                 }
                 break;
             case 2:
-                if(xHead + 1 >= xSize){
+                if (xHead + 1 >= xSize) {
                     xHead = 0;
-                }
-                else{
+                } else {
                     xHead++;
                 }
                 break;
             case 3:
-                if(yHead - 1 < 0){
+                if (yHead - 1 < 0) {
                     yHead = ySize - 1;
-                }
-                else{
+                } else {
                     yHead--;
                 }
                 break;
             case 4:
-                if(xHead - 1 < 0){
+                if (xHead - 1 < 0) {
                     xHead = ySize - 1;
-                }
-                else{
+                } else {
                     xHead--;
                 }
                 break;
         }
-        if(board[xHead][yHead] == -1){
+        if (board[xHead][yHead] == -1) {
             board[xHead][yHead] = size + 1;
+            points++;
             return size;
-        }
-        else if(board[xHead][yHead] > 0){
+        } else if (board[xHead][yHead] > 0) {
             return -size;
-        }
-        else{
+        } else {
             board[xHead][yHead] = size;
         }
         return 0;
     }
 
     public void startGameAnimation() {
-
     }
 
     public static void displayBoard(Canvas c, int[][] board, final Object lock, Paint p) {
         synchronized (lock) {
             for (int i = 0; i < board.length; i++) {
                 for (int j = 0; j < board[i].length; j++) {
-                    c.drawRect(i * 1.0f / board.length * c.getWidth(),
-                            j * 1.0f / board[i].length * c.getHeight(),
-                            (i + 1.0f) / board.length * c.getWidth(),
-                            (j + 1.0f) / board[i].length * c.getHeight(), null);
+                    if (board[i][j] > 0) {
+                        c.drawRect(i * 1.0f / board.length * c.getWidth(),
+                                j * 1.0f / board[i].length * c.getHeight(),
+                                (i + 1.0f) / board.length * c.getWidth(),
+                                (j + 1.0f) / board[i].length * c.getHeight(), p);
+                    }
+                    if (board[i][j] < 0) {
+                        int color = p.getColor();
+                        p.setColor(Color.RED);
+                        c.drawRect(i * 1.0f / board.length * c.getWidth(),
+                                j * 1.0f / board[i].length * c.getHeight(),
+                                (i + 1.0f) / board.length * c.getWidth(),
+                                (j + 1.0f) / board[i].length * c.getHeight(), p);
+                        p.setColor(color);
+                    }
                 }
             }
         }
