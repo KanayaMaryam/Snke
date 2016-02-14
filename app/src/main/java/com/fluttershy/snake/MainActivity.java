@@ -1,12 +1,13 @@
 package com.fluttershy.snake;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
@@ -18,22 +19,33 @@ import android.widget.Toast;
 
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
-    final int REQUEST_ENABLE_BT=69;
-    ArrayAdapter<String> listAdapter;
-    Button connectNew;
-    ListView listView;
-    BluetoothAdapter mBluetoothAdapter;
-    Set<BluetoothDevice> devicesArray;
+public class MainActivity extends Activity {
+    private final int REQUEST_ENABLE_BT = 69;
+    private ArrayAdapter<String> listAdapter;
+    private Button connectNew;
+    private ListView listView;
+    private BluetoothAdapter mBluetoothAdapter;
+    private Set<BluetoothDevice> devicesArray;
+    private Context c = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ((Button) findViewById(R.id.btnSignUp)).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(c, GameActivity.class);
+                i.putExtra("mode", 1);
+                startActivity(i);
+            }
+        });
 
     }
-    public void connect (View v){
+
+    public void connect(View v) {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
             CharSequence text = "Your device does not allow bluetooth";
@@ -41,35 +53,36 @@ public class MainActivity extends AppCompatActivity {
 
             Toast toast = Toast.makeText(this, text, duration);
             toast.show();
-        }
-        else if (!mBluetoothAdapter.isEnabled()) {
+        } else if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-        else{
+        } else {
             getPairedDevices();
         }
 
     }
-    public void getPairedDevices(){
-        devicesArray=mBluetoothAdapter.getBondedDevices();
-        if (devicesArray.size() > 0){
-            for(BluetoothDevice device:devicesArray){
-                listAdapter.add(device.getName()+"\n"+device.getAddress());
+
+    public void getPairedDevices() {
+        devicesArray = mBluetoothAdapter.getBondedDevices();
+        if (devicesArray.size() > 0) {
+            for (BluetoothDevice device : devicesArray) {
+                listAdapter.add(device.getName() + "\n" + device.getAddress());
 
             }
         }
     }
-    private void init(){
-        connectNew=(Button)findViewById(R.id.btooth);
-        listView=(ListView)findViewById(R.id.list);
+
+    private void init() {
+        connectNew = (Button) findViewById(R.id.btooth);
+        listView = (ListView) findViewById(R.id.list);
         listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, 0);
         listView.setAdapter(listAdapter);
 
     }
-    protected void onActicityResult(int requestCode, int resultCode, Intent data){
+
+    protected void onActicityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode==RESULT_CANCELED){
+        if (resultCode == RESULT_CANCELED) {
             CharSequence text = "Y u no enable blutoth";
             int duration = Toast.LENGTH_SHORT;
 
