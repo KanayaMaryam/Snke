@@ -31,7 +31,7 @@ public class GameManager {
     int status = 0;
     int currentDirection = 1;
     int mode;
-    int points = 0;
+    int points = 1;
 
 
     public GameManager(int x, int y, int xStart, int yStart, InputStream in, OutputStream out, int mode, final SurfaceView surfaceView) {
@@ -51,11 +51,11 @@ public class GameManager {
                             if (event.getX() * 1f / surfaceView.getWidth() > (surfaceView.getHeight() - event.getY()) * 1f / surfaceView.getHeight()) {
                                 currentDirection = 2;
                             } else {
-                                currentDirection = 1;
+                                currentDirection = 3;
                             }
                         } else {
                             if (event.getX() * 1f / surfaceView.getWidth() > (surfaceView.getHeight() - event.getY()) * 1f / surfaceView.getHeight()) {
-                                currentDirection = 3;
+                                currentDirection = 1;
                             } else {
                                 currentDirection = 4;
                             }
@@ -72,6 +72,7 @@ public class GameManager {
         status = 1;
         if (mode == 1) {
             board[xHead][yHead] = 1;
+            addApple();
         }
         startGameAnimation();
         Thread gLoop = new Thread(new Runnable() {
@@ -81,6 +82,12 @@ public class GameManager {
                 while (status > 0) {
                     update();
                     display();
+                    try{
+                        Thread.sleep(100);
+                    }
+                    catch(InterruptedException e){
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -105,13 +112,12 @@ public class GameManager {
         if (mode == 1) {
             int bufferedStatus = nextIteration(currentDirection);
             if (bufferedStatus < 0) {
-                points = -bufferedStatus;
                 status = -1;
             }
-            if (bufferedStatus > 0) {
-                points = bufferedStatus;
+            if(bufferedStatus > 0){
+                addApple();
             }
-        }
+       }
     }
 
     private int nextIteration(int dir){
@@ -239,6 +245,33 @@ public class GameManager {
 
         return ret;
     }
+    private void addApple(){
+        int spaces = 0;
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                if (board[i][j] > 0) {
+                    spaces++;
+                }
+            }
+        }
+        double rng = Math.random() * (board.length * board[0].length - spaces) + 1;
+        spaces = 0;
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                if (board[i][j] > 0) {
+                    continue;
+                }
+                if (rng - spaces < 1) {
+                    board[i][j] = -1;
+                    return;
+                }
+                spaces++;
+            }
+            if (i == board.length - 1)
+                i = 0;
+        }
+    }
+
 
 
 }
