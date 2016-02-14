@@ -52,7 +52,7 @@ public class GameManager {
 
     public void update() {
         if(mode == 1){
-            
+
         }
     }
 
