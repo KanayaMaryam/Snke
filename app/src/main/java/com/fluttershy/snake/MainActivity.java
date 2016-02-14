@@ -45,8 +45,8 @@ public class MainActivity extends Activity {
             }
         });
 
-        BluetoothManager b = new BluetoothManager(this, BluetoothAdapter.getDefaultAdapter().getAddress() == BluetoothManager.ZONG_PHONE_BT,
-                BluetoothManager.ZONG_PHONE_BT);
+        BluetoothManager b = new BluetoothManager(this, false,
+                null);
 
     }
 

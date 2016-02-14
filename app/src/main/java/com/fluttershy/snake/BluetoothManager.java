@@ -17,7 +17,7 @@ import java.util.UUID;
  * Created by Chen on 2/13/2016.
  */
 public class BluetoothManager {
-    private UUID uuid = UUID.randomUUID();
+    private UUID uuid = UUID.fromString("ffb0070b-b5e6-4c35-b2ba-e05f370aa993");
     private Context c;
     private BluetoothAdapter badapter;
     private boolean isServer;
@@ -25,22 +25,22 @@ public class BluetoothManager {
     private BluetoothSocket socket;
     private BluetoothDevice target;
 
-    public static final String ZONG_PHONE_BT = " 14:2D:27:99:CC:A6";
+    public static final String ZONG_PHONE_NAME = "ffb0070b-b5e6-4c35-b2ba-e05f370aa993";
 
-    public BluetoothManager(Context c, boolean server, String goalAddress){
+    public BluetoothManager(Context c, boolean server, String name){
         this.isServer = server;
         this.c = c;
         badapter = BluetoothAdapter.getDefaultAdapter();
 
         Intent discoverableIntent = new
                 Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 3000);
         c.startActivity(discoverableIntent);
 
         Set<BluetoothDevice> devices = badapter.getBondedDevices();
         for(BluetoothDevice device: devices){
             Log.d("device Found", device.getName() + "\n" + device.getAddress());
-            if(device.getAddress() == goalAddress){
+            if(device.getName() == name){
                 target = device;
             }
         }
@@ -55,7 +55,8 @@ public class BluetoothManager {
             }
         }
         else{
-
+            Thread t = new Thread(new ClientAccept());
+            t.start();
         }
     }
 
