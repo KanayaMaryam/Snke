@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -44,12 +45,15 @@ public class MainActivity extends Activity {
             }
         });
 
+        BluetoothManager b = new BluetoothManager(this, BluetoothAdapter.getDefaultAdapter().getAddress() == BluetoothManager.ZONG_PHONE_BT,
+                BluetoothManager.ZONG_PHONE_BT);
+
     }
-    public void connect(View v){
+
+    public void connect(View v) {
 
         startActivity(new Intent(this, DisplayConnections.class));
     }
-
 
 
 }
