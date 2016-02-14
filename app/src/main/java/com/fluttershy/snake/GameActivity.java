@@ -2,11 +2,13 @@ package com.fluttershy.snake;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.SurfaceView;
 
 public class GameActivity extends Activity {
 
     GameManager gm;
     int mode;
+    SurfaceView view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,6 +17,7 @@ public class GameActivity extends Activity {
 
         mode = getIntent().getIntExtra("mode", 1);
 
-        gm = new GameManager(10, 10, 0, 0, null, null);
+        view = (SurfaceView) findViewById(R.id.gameCanvas);
+        gm = new GameManager(10, 10, 0, 0, null, null, mode, view.getHolder());
     }
 }
